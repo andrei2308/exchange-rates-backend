@@ -8,18 +8,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import webapp.exchangerates.model.ExchangeRateApiResponse;
 
+import java.math.BigInteger;
+
 @Service
 public class ExchangeRateSchedulerService {
     private static final Logger logger = LoggerFactory.getLogger(ExchangeRateSchedulerService.class);
 
     private final RestTemplate restTemplate;
+    private final ExchangeContractService exchangeContractService;
     private final ExchangeRateService exchangeRateService;
 
     //TODO: add revolut api instead of mock
     @Value("${exchange.api.url}")
     private String apiUrl;
 
-    public ExchangeRateSchedulerService(ExchangeRateService exchangeRateService) {
+    public ExchangeRateSchedulerService(ExchangeContractService exchangeContractService, ExchangeRateService exchangeRateService) {
+        this.exchangeContractService = exchangeContractService;
         this.restTemplate = new RestTemplate();
         this.exchangeRateService = exchangeRateService;
     }
@@ -35,6 +39,13 @@ public class ExchangeRateSchedulerService {
             if (response != null) {
                 double eurUsd = response.getEurUsd();
                 exchangeRateService.updateExchangeRate(eurUsd);
+                BigInteger rateForBlockchain = convertRateToBlockchainFormat(eurUsd);
+                try {
+                    exchangeContractService.setExchangeRate(rateForBlockchain);
+                    logger.info("Successfully updated blockchain exchange rate: EUR/USD = {}", eurUsd);
+                } catch (Exception e) {
+                    logger.error("Failed to update blockchain exchange rate: {}", e.getMessage());
+                }
                 logger.info("Successfully updated exchange rate: EUR/USD = {}", eurUsd);
             } else {
                 logger.error("Failed to fetch exchange rates: empty response");
@@ -42,5 +53,14 @@ public class ExchangeRateSchedulerService {
         } catch (Exception e) {
             logger.error("Error updating exchange rates", e);
         }
+    }
+    /**
+     * Converts a double exchange rate to the format expected by the blockchain
+     * You may need to adjust this based on your contract's requirements
+     */
+    private BigInteger convertRateToBlockchainFormat(double rate) {
+        long scaleFactor = 1000000L; // 10^8
+        long scaledRate = Math.round(rate * scaleFactor);
+        return BigInteger.valueOf(scaledRate);
     }
 }
