@@ -28,7 +28,7 @@ public class ExchangeRateSchedulerService {
         this.exchangeRateService = exchangeRateService;
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 15000)
     public void updateExchangeRates() {
         logger.info("Fetching latest exchange rates");
         try {
@@ -59,7 +59,7 @@ public class ExchangeRateSchedulerService {
      * You may need to adjust this based on your contract's requirements
      */
     private BigInteger convertRateToBlockchainFormat(double rate) {
-        long scaleFactor = 1000000L; // 10^8
+        long scaleFactor = 100000000L; // 10^8
         long scaledRate = Math.round(rate * scaleFactor);
         return BigInteger.valueOf(scaledRate);
     }

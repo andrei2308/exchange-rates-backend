@@ -10,15 +10,19 @@ import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Int256;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthCall;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
+import org.web3j.utils.Numeric;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -44,8 +48,8 @@ public class ExchangeContractService {
         this.credentials = credentials;
         this.contractAddress = contractAddress;
         this.gasProvider = new StaticGasProvider(
-                BigInteger.valueOf(20_000_000_000L),
-                BigInteger.valueOf(200_000L)
+                BigInteger.valueOf(50_000_000_000L), // 50 Gwei
+                BigInteger.valueOf(500_000L) // Higher gas limit
         );
     }
 
@@ -89,7 +93,7 @@ public class ExchangeContractService {
      * @return The transaction receipt
      */
     public TransactionReceipt setExchangeRate(BigInteger newExchangeRate)
-            throws IOException, InterruptedException {
+            throws Exception {
         Function function = new Function(
                 "setExchangeRate",
                 Collections.singletonList(new Int256(newExchangeRate)),
@@ -98,20 +102,31 @@ public class ExchangeContractService {
 
         String encodedFunction = FunctionEncoder.encode(function);
 
-        TransactionManager transactionManager = new RawTransactionManager(
-                web3j,
-                credentials,
-                web3j.ethChainId().send().getChainId().longValue()
-        );
+        BigInteger nonce = web3j.ethGetTransactionCount(
+                credentials.getAddress(),
+                DefaultBlockParameterName.LATEST
+        ).sendAsync().get().getTransactionCount();
 
-        String transactionHash = transactionManager.sendTransaction(
-                gasProvider.getGasPrice(),
+        BigInteger gasPrice = web3j.ethGasPrice().sendAsync().get().getGasPrice();
+
+        RawTransaction rawTransaction = RawTransaction.createTransaction(
+                nonce,
+                gasPrice,
                 gasProvider.getGasLimit(),
                 contractAddress,
-                encodedFunction,
-                BigInteger.ZERO).getTransactionHash();
+                encodedFunction
+        );
 
-        return waitForTransactionReceipt(transactionHash);
+        byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction,credentials);
+        String hexValue = Numeric.toHexString(signedMessage);
+
+        EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(hexValue).sendAsync().get();
+
+        if(ethSendTransaction.hasError()){
+            throw new Exception("Error updating exchange rate " + ethSendTransaction.getError().getMessage());
+        }
+
+        return waitForTransactionReceipt(ethSendTransaction.getTransactionHash());
     }
 
     /**
