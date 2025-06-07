@@ -38,7 +38,6 @@ public class ExchangeRateSchedulerService {
 
             if (response != null) {
                 double eurUsd = response.getEurUsd();
-                exchangeRateService.updateExchangeRate(eurUsd);
                 BigInteger rateForBlockchain = convertRateToBlockchainFormat(eurUsd);
                 try {
                     exchangeContractService.setExchangeRate(rateForBlockchain);
@@ -46,6 +45,7 @@ public class ExchangeRateSchedulerService {
                 } catch (Exception e) {
                     logger.error("Failed to update blockchain exchange rate: {}", e.getMessage());
                 }
+                exchangeRateService.updateExchangeRate(eurUsd);
                 logger.info("Successfully updated exchange rate: EUR/USD = {}", eurUsd);
             } else {
                 logger.error("Failed to fetch exchange rates: empty response");
