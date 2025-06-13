@@ -1,4 +1,4 @@
-package webapp.exchangerates.service;
+package webapp.exchangerates.service.exchange.scheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import webapp.exchangerates.model.ExchangeRateApiResponse;
+import webapp.exchangerates.service.exchange.contract.ExchangeContractService;
+import webapp.exchangerates.service.exchange.rate.ExchangeRateService;
 
 import java.math.BigInteger;
 
@@ -22,9 +24,9 @@ public class ExchangeRateSchedulerService {
     @Value("${exchange.api.url}")
     private String apiUrl;
 
-    public ExchangeRateSchedulerService(ExchangeContractService exchangeContractService, ExchangeRateService exchangeRateService) {
+    public ExchangeRateSchedulerService(ExchangeContractService exchangeContractService, ExchangeRateService exchangeRateService, RestTemplate restTemplate) {
         this.exchangeContractService = exchangeContractService;
-        this.restTemplate = new RestTemplate();
+        this.restTemplate = restTemplate;
         this.exchangeRateService = exchangeRateService;
     }
 

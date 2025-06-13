@@ -1,4 +1,4 @@
-package webapp.exchangerates.service;
+package webapp.exchangerates.service.exchange.rate;
 
 import org.springframework.stereotype.Service;
 import webapp.exchangerates.model.ExchangeRate;

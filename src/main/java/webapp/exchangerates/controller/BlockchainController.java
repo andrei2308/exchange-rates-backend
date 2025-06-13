@@ -1,11 +1,10 @@
 package webapp.exchangerates.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import webapp.exchangerates.service.Web3Service;
+import webapp.exchangerates.service.web3.Web3Service;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -16,7 +15,6 @@ public class BlockchainController {
 
     private final Web3Service web3Service;
 
-    @Autowired
     public BlockchainController(Web3Service web3Service) {
         this.web3Service = web3Service;
     }

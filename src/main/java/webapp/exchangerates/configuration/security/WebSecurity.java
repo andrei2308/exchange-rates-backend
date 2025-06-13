@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-// TODO: remove basic auth and add jwt
 @Configuration
 @EnableWebSecurity
 public class WebSecurity {
