@@ -1,5 +1,6 @@
 package webapp.exchangerates.configuration.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,10 +15,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-// TODO: remove basic auth and add jwt
 @Configuration
 @EnableWebSecurity
 public class WebSecurity {
+
+    @Value("${USERNAME}")
+    private String ADMIN_USERNAME;
+
+    @Value("${PASSWORD}")
+    private String ADMIN_PASSWORD;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -45,18 +51,12 @@ public class WebSecurity {
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails adminUser = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("admin123"))
+                .username(ADMIN_USERNAME)
+                .password(passwordEncoder().encode(ADMIN_PASSWORD))
                 .roles("ADMIN", "USER")
                 .build();
 
-        UserDetails regularUser = User.builder()
-                .username("user")
-                .password(passwordEncoder().encode("user123"))
-                .roles("USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(adminUser, regularUser);
+        return new InMemoryUserDetailsManager(adminUser);
     }
 
     @Bean
