@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import webapp.exchangerates.model.ExchangeRateApiResponse;
+import webapp.exchangerates.domain.model.ExchangeRateApiResponse;
 import webapp.exchangerates.service.exchange.contract.ExchangeContractService;
 import webapp.exchangerates.service.exchange.rate.ExchangeRateService;
 
@@ -30,7 +30,7 @@ public class ExchangeRateSchedulerService {
         this.exchangeRateService = exchangeRateService;
     }
 
-    @Scheduled(fixedRate = 15000)
+    @Scheduled(fixedRate = 15000000)
     public void updateExchangeRates() {
         logger.info("Fetching latest exchange rates");
         try {

@@ -1,4 +1,4 @@
-package webapp.exchangerates.model;
+package webapp.exchangerates.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
