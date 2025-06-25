@@ -5,15 +5,12 @@ import com.stripe.model.PaymentIntent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import webapp.exchangerates.domain.dto.CreatePaymentIntentRequest;
 import webapp.exchangerates.domain.dto.PaymentIntentResponse;
 import webapp.exchangerates.domain.dto.PaymentIntentStatusResponse;
 import webapp.exchangerates.service.stripe.FiatTransferService;
 import webapp.exchangerates.service.stripe.StripeService;
-
-import java.security.Principal;
 
 @Slf4j
 @RestController
@@ -26,22 +23,18 @@ public class StripeController {
 
     @PostMapping("/payment-intent")
     public ResponseEntity<PaymentIntentResponse> createPaymentIntent(
-            @RequestBody CreatePaymentIntentRequest request,
-            @AuthenticationPrincipal Principal principal) {
+            @RequestBody CreatePaymentIntentRequest request) {
         try {
-            String userId = "1";
 
             Long amountInCents = Math.round(request.getAmount() * 100);
 
             PaymentIntent intent = stripeService.createPaymentIntent(
                     amountInCents,
                     request.getCurrency(),
-                    request.getRecipientAddress(),
-                    userId
+                    request.getRecipientAddress()
             );
 
             fiatTransferService.createTransferRecord(
-                    userId,
                     request.getRecipientAddress(),
                     request.getAmount(),
                     request.getCurrency(),
@@ -63,8 +56,7 @@ public class StripeController {
 
     @GetMapping("/payment-intent/{id}")
     public ResponseEntity<PaymentIntentStatusResponse> getPaymentIntentStatus(
-            @PathVariable String id,
-            @AuthenticationPrincipal Principal principal) {
+            @PathVariable String id) {
         try {
             PaymentIntent intent = stripeService.retrievePaymentIntent(id);
 
