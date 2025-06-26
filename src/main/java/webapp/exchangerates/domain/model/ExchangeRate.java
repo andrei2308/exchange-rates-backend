@@ -1,4 +1,4 @@
-package webapp.exchangerates.model;
+package webapp.exchangerates.domain.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

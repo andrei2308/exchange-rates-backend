@@ -1,7 +1,7 @@
 package webapp.exchangerates.service.exchange.rate;
 
 import org.springframework.stereotype.Service;
-import webapp.exchangerates.model.ExchangeRate;
+import webapp.exchangerates.domain.model.ExchangeRate;
 import webapp.exchangerates.repository.ExchangeRateRepository;
 
 @Service
