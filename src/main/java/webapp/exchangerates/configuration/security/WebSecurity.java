@@ -12,8 +12,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 @EnableWebSecurity
@@ -25,6 +32,9 @@ public class WebSecurity {
     @Value("${PASSWORD}")
     private String ADMIN_PASSWORD;
 
+    @Value("${jwt.secretKey}")
+    private String jwtSecretKey;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -34,18 +44,30 @@ public class WebSecurity {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/exchange/**").authenticated()
+                        .requestMatchers("/api/exchange-rate").hasRole("ADMIN")
+                        .requestMatchers("/api/exchange/**").hasRole("ADMIN")
                         .requestMatchers("/rate").authenticated()
+                        .requestMatchers("/api/v1/stripe/**").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(httpBasic -> {
-                })
                 .formLogin(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers
                         .frameOptions().sameOrigin()
-                );
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .decoder(jwtDecoder())
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         return http.build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        byte[] keyBytes = jwtSecretKey.getBytes(StandardCharsets.UTF_8);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "HmacSHA256");
+        return NimbusJwtDecoder.withSecretKey(secretKeySpec).build();
     }
 
     @Bean
@@ -62,5 +84,16 @@ public class WebSecurity {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
+        converter.setAuthoritiesClaimName("roles");
+        converter.setAuthorityPrefix("");
+
+        JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(converter);
+        return authenticationConverter;
     }
 }
