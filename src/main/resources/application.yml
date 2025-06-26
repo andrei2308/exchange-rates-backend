@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: exchange-rates
+
+  # H2 config
+  datasource:
+    url: jdbc:h2:file:./data/database;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    # Hibernate
+    hibernate:
+      ddl-auto: update
+
+  # H2 console
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+exchange:
+  api:
+    url: ${REVOLUT_API}
+
+# web3J
+web3j:
+  client-address: ${ETHEREUM_RPC_URL}
+  admin-client: false
+  http-timeout-seconds: 30
+
+# anvil default account private key
+ethereum:
+  private-key: ${ETHEREUM_PRIVATE_KEY}
+  exchange-contract-address: "0xc97991CdF6F581Cf34C9a0975aa0dA6F00992799"
+  node-url: ${ETHEREUM_RPC_URL}
+
+stripe:
+  api:
+    key: ${STRIPE_SECRET_KEY}
+    publishable-key: ${STRIPE_PUBLISHABLE_KEY}
+  webhook:
+    secret: ${STRIPE_WEBHOOK_SECRET}
