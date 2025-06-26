@@ -8,7 +8,7 @@ import webapp.exchangerates.domain.model.ExchangeRate;
 import webapp.exchangerates.service.exchange.rate.ExchangeRateService;
 
 @RestController
-@RequestMapping("/api/rates")
+@RequestMapping("/api/exchange-rate")
 public class RatesController {
     private final ExchangeRateService exchangeRateService;
 

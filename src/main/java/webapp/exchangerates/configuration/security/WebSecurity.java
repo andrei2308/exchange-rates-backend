@@ -44,7 +44,7 @@ public class WebSecurity {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/exchange-rate").hasRole("ADMIN")  // Use hasRole instead
+                        .requestMatchers("/api/exchange-rate").hasRole("ADMIN")
                         .requestMatchers("/api/exchange/**").hasRole("ADMIN")
                         .requestMatchers("/rate").authenticated()
                         .requestMatchers("/api/v1/stripe/**").hasRole("ADMIN")
@@ -66,7 +66,7 @@ public class WebSecurity {
     @Bean
     public JwtDecoder jwtDecoder() {
         byte[] keyBytes = jwtSecretKey.getBytes(StandardCharsets.UTF_8);
-        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "HmacSHA512");
+        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "HmacSHA256");
         return NimbusJwtDecoder.withSecretKey(secretKeySpec).build();
     }
 
@@ -90,7 +90,7 @@ public class WebSecurity {
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
         converter.setAuthoritiesClaimName("roles");
-        converter.setAuthorityPrefix("ROLE_");
+        converter.setAuthorityPrefix("");
 
         JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
         authenticationConverter.setJwtGrantedAuthoritiesConverter(converter);
