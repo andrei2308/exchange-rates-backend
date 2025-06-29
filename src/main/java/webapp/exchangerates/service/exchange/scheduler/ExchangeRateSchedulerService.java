@@ -20,7 +20,6 @@ public class ExchangeRateSchedulerService {
     private final ExchangeContractService exchangeContractService;
     private final ExchangeRateService exchangeRateService;
 
-    //TODO: add revolut api instead of mock
     @Value("${exchange.api.url}")
     private String apiUrl;
 
@@ -30,7 +29,7 @@ public class ExchangeRateSchedulerService {
         this.exchangeRateService = exchangeRateService;
     }
 
-    @Scheduled(fixedRate = 15000)
+    @Scheduled(fixedRate = 15000000)
     public void updateExchangeRates() {
         logger.info("Fetching latest exchange rates");
         try {
@@ -44,11 +43,11 @@ public class ExchangeRateSchedulerService {
                 try {
                     exchangeContractService.setExchangeRate(rateForBlockchain);
                     logger.info("Successfully updated blockchain exchange rate: EUR/USD = {}", eurUsd);
+                    exchangeRateService.updateExchangeRate(eurUsd);
+                    logger.info("Successfully updated exchange rate: EUR/USD = {}", eurUsd);
                 } catch (Exception e) {
                     logger.error("Failed to update blockchain exchange rate: {}", e.getMessage());
                 }
-                exchangeRateService.updateExchangeRate(eurUsd);
-                logger.info("Successfully updated exchange rate: EUR/USD = {}", eurUsd);
             } else {
                 logger.error("Failed to fetch exchange rates: empty response");
             }
