@@ -29,7 +29,7 @@ public class ExchangeRateSchedulerService {
         this.exchangeRateService = exchangeRateService;
     }
 
-    @Scheduled(fixedRate = 15000000)
+    @Scheduled(fixedRate = 1500000000)
     public void updateExchangeRates() {
         logger.info("Fetching latest exchange rates");
         try {
